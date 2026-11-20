@@ -93,5 +93,7 @@ export async function adminAudio(path, body) {
     try { j = await r.json(); } catch { /* 빈 응답 */ }
     throw new Error(j.error || "미리듣기를 만들지 못했어요. (" + r.status + ")");
   }
-  return URL.createObjectURL(await r.blob());
+  let info = null;
+  try { info = JSON.parse(decodeURIComponent(r.headers.get("X-Preview-Info") || "")); } catch { /* 없어도 괜찮음 */ }
+  return { url: URL.createObjectURL(await r.blob()), info };
 }

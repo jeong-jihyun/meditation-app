@@ -88,3 +88,4 @@ audio.built{width:100%;margin-top:10px}
 .preview{margin-top:18px;padding-top:16px;border-top:1px solid var(--line, rgba(0,0,0,.08))}
 .preview .wide{margin-top:0}
 .preview .hint{margin-top:8px}
+.preview .heard{margin-top:8px;line-height:1.6}.preview .heard b{display:block;color:var(--ink,inherit)}

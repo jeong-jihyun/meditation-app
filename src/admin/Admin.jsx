@@ -246,7 +246,7 @@ function Editor({ init, data, busy, onSave, onDelete }) {
   const sampleRef = useRef(null);
   const previewRef = useRef(null);
   const bodyRef = useRef(null);
-  const [pv, setPv] = useState({ url: "", key: "", loading: false, err: "" }); // 지금 설정으로 미리듣기
+  const [pv, setPv] = useState({ url: "", key: "", info: null, loading: false, err: "" }); // 지금 설정으로 미리듣기
   const set = (k) => (v) => setF((x) => ({ ...x, [k]: v?.target ? v.target.value : v }));
 
   const preset = data.voices.find((v) => v.id === f.voice) || data.voices[0];
@@ -286,9 +286,9 @@ function Editor({ init, data, busy, onSave, onDelete }) {
     sampleRef.current?.pause(); setPlaying(null);
     setPv((x) => ({ ...x, loading: true, err: "" }));
     try {
-      const url = await adminAudio("preview", { voice: f.voice, pitch: f.pitch, rate: f.rate, gap: f.gap, body: f.body });
+      const { url, info } = await adminAudio("preview", { voice: f.voice, pitch: f.pitch, rate: f.rate, gap: f.gap, body: f.body });
       if (pv.url) URL.revokeObjectURL(pv.url);
-      setPv({ url, key: pvKey, loading: false, err: "" });
+      setPv({ url, info, key: pvKey, loading: false, err: "" });
     } catch (e) {
       setPv((x) => ({ ...x, loading: false, err: e.message }));
     }
@@ -355,6 +355,7 @@ function Editor({ init, data, busy, onSave, onDelete }) {
           <p className="hint">{f.body.trim() ? "대본 앞부분(몇 문장)을" : "대본이 비어 있어 인사 문장을"} 지금 고른 성우·톤·속도·쉼 그대로 만들어 들려줘요. 5~10초 걸려요.</p>
           {pv.err && <p className="warn">{pv.err}</p>}
           {pv.url && <audio ref={previewRef} className="built" controls src={pv.url} onPlay={() => { sampleRef.current?.pause(); setPlaying(null); }} />}
+          {pv.info?.heard?.length > 0 && <p className="hint heard"><b>실제로 읽은 내용</b> {pv.info.heard.join(" · ")}</p>}
           {pvStale && <p className="warn">설정이나 대본이 바뀌었어요. 다시 들으려면 위 버튼을 눌러 주세요.</p>}
         </div>
       </section>
