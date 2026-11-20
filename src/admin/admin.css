@@ -85,3 +85,6 @@ audio.built{width:100%;margin-top:10px}
 .actions .warn{flex-basis:100%;text-align:right;margin:0}
 .danger{background:none;color:#b4483c;border:1px solid #e5c2bc;border-radius:99px;padding:11px 16px;font-weight:700;font-size:12px}
 .admin .toast{bottom:calc(30px + env(safe-area-inset-bottom))}
+.preview{margin-top:18px;padding-top:16px;border-top:1px solid var(--line, rgba(0,0,0,.08))}
+.preview .wide{margin-top:0}
+.preview .hint{margin-top:8px}

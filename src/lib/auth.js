@@ -79,3 +79,19 @@ export async function adminApi(path, opts = {}) {
   if (!r.ok) throw Object.assign(new Error(j.error || "서버에 연결하지 못했어요. (" + r.status + ")"), { status: r.status });
   return j;
 }
+
+// 관리자 API에서 소리(MP3)를 받아 재생용 주소로 돌려준다 (미리듣기)
+export async function adminAudio(path, body) {
+  const r = await fetch("/api/admin/" + path, {
+    method: "POST",
+    headers: { Authorization: "Bearer " + auth.get().session, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (r.status === 401) logout();
+  if (!r.ok) {
+    let j = {};
+    try { j = await r.json(); } catch { /* 빈 응답 */ }
+    throw new Error(j.error || "미리듣기를 만들지 못했어요. (" + r.status + ")");
+  }
+  return URL.createObjectURL(await r.blob());
+}

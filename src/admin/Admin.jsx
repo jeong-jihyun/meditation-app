@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CATS } from "../data.js";
 import { mins, useStore } from "../lib/store.js";
-import { auth, isAdmin, adminApi, renderGoogleButton, logout } from "../lib/auth.js";
+import { auth, isAdmin, adminApi, adminAudio, renderGoogleButton, logout } from "../lib/auth.js";
 import { applyTheme } from "../lib/settings.js";
 import "./admin.css";
 
@@ -244,7 +244,9 @@ function Editor({ init, data, busy, onSave, onDelete }) {
   const [gender, setGender] = useState("all");
   const [playing, setPlaying] = useState(null);
   const sampleRef = useRef(null);
+  const previewRef = useRef(null);
   const bodyRef = useRef(null);
+  const [pv, setPv] = useState({ url: "", key: "", loading: false, err: "" }); // 지금 설정으로 미리듣기
   const set = (k) => (v) => setF((x) => ({ ...x, [k]: v?.target ? v.target.value : v }));
 
   const preset = data.voices.find((v) => v.id === f.voice) || data.voices[0];
@@ -255,17 +257,44 @@ function Editor({ init, data, busy, onSave, onDelete }) {
   const built = init.built;
   const changed = built && (JSON.stringify({ ...f, status: 0 }) !== JSON.stringify({ ...init, status: 0 }));
 
+  // 샘플은 성우 기본 속도로 이미 만들어져 있으므로, 슬라이더로 바꾼 만큼만 빠르게/느리게 한다
+  const sampleRate = (v) => {
+    const base = 100 + BASE_RATE + (v?.rate || 0);
+    return Math.max(0.5, Math.min(2, (base + f.rate) / base));
+  };
+  useEffect(() => { // 샘플을 듣는 중에 속도를 바꾸면 바로 반영
+    const a = sampleRef.current;
+    if (a && playing) a.playbackRate = sampleRate(data.voices.find((v) => v.id === playing));
+  }, [f.rate, playing]); // eslint-disable-line
+
   function playSample(v) {
     const a = sampleRef.current;
     if (playing === v.id) { a.pause(); setPlaying(null); return; }
     const s = data.samples[v.id];
     if (!s) { alert("이 성우의 샘플은 아직 만들어지지 않았어요. 잠시 뒤 새로 고침해 주세요."); return; }
+    previewRef.current?.pause();
     a.src = data.cdn + s.file + "?v=" + s.hash;
     a.preservesPitch = true;
-    a.playbackRate = Math.max(0.5, Math.min(2, 1 + (v.rate + f.rate) / 100)); // 속도만 미리 맞춰 들려줌
+    a.playbackRate = sampleRate(v);
     a.play().catch(() => {});
     setPlaying(v.id);
   }
+
+  // 지금 고른 성우·톤·속도·쉼으로 대본 앞부분을 실제 목소리로 만들어 들려준다
+  const pvKey = JSON.stringify([f.voice, f.pitch, f.rate, f.gap, f.body.slice(0, 400)]);
+  async function preview() {
+    sampleRef.current?.pause(); setPlaying(null);
+    setPv((x) => ({ ...x, loading: true, err: "" }));
+    try {
+      const url = await adminAudio("preview", { voice: f.voice, pitch: f.pitch, rate: f.rate, gap: f.gap, body: f.body });
+      if (pv.url) URL.revokeObjectURL(pv.url);
+      setPv({ url, key: pvKey, loading: false, err: "" });
+    } catch (e) {
+      setPv((x) => ({ ...x, loading: false, err: e.message }));
+    }
+  }
+  const pvStale = pv.url && pv.key !== pvKey;
+  useEffect(() => { if (pv.url) previewRef.current?.play().catch(() => {}); }, [pv.url]); // 새로 만든 소리를 바로 재생
 
   function insert(text) {
     const el = bodyRef.current;
@@ -315,10 +344,19 @@ function Editor({ init, data, busy, onSave, onDelete }) {
             </div>
           ))}
         </div>
-        <p className="hint">▶ 샘플은 고른 속도로 들려줘요. 톤은 저장한 뒤 만들어진 소리로 확인할 수 있어요.</p>
+        <p className="hint">▶ 성우 목소리를 비교해 들어 보세요. 톤·속도·쉼은 아래 <b>지금 설정으로 듣기</b>로 확인해요.</p>
         <Slider label="톤 (높낮이)" value={f.pitch} min={-10} max={10} step={1} onChange={set("pitch")} left="낮게" right="높게" show={(v) => (v > 0 ? "+" : "") + v} />
         <Slider label="말하는 속도" value={f.rate} min={-30} max={20} step={2} onChange={set("rate")} left="느리게" right="빠르게" show={(v) => (v > 0 ? "+" : "") + v + "%"} />
         <Slider label="문장 사이 쉼" value={f.gap} min={0.4} max={3} step={0.1} onChange={set("gap")} left="짧게" right="길게" show={(v) => v.toFixed(1) + "초"} />
+        <div className="preview">
+          <button type="button" className="primary-btn wide" onClick={preview} disabled={pv.loading}>
+            {pv.loading ? <><span className="spin" />목소리 만드는 중…</> : pvStale ? "▶ 바뀐 설정으로 다시 듣기" : "▶ 지금 설정으로 듣기"}
+          </button>
+          <p className="hint">{f.body.trim() ? "대본 앞부분(몇 문장)을" : "대본이 비어 있어 인사 문장을"} 지금 고른 성우·톤·속도·쉼 그대로 만들어 들려줘요. 5~10초 걸려요.</p>
+          {pv.err && <p className="warn">{pv.err}</p>}
+          {pv.url && <audio ref={previewRef} className="built" controls src={pv.url} onPlay={() => { sampleRef.current?.pause(); setPlaying(null); }} />}
+          {pvStale && <p className="warn">설정이나 대본이 바뀌었어요. 다시 들으려면 위 버튼을 눌러 주세요.</p>}
+        </div>
       </section>
 
       <section className="card">
