@@ -15,6 +15,7 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, 
 // 아래는 24kHz·48kbps·모노(Microsoft 출력과 같은 형식) 무음 프레임 1개(144바이트 = 0.024초)
 const SILENT = Buffer.from("//NkxAAAAANIAAAAAExBTUUzLjEwMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "base64");
 const FRAME_SEC = 0.024;
+const FRAME_BYTES = 144;
 const BYTES_PER_SEC = 6000; // 48kbps
 export const silence = (sec) => Buffer.concat(Array(Math.max(0, Math.round(sec / FRAME_SEC))).fill(SILENT));
 
@@ -62,9 +63,13 @@ export async function assemble(parts, say) {
   for (const p of parts) {
     if (p.rest !== undefined) { bufs.push(silence(p.rest)); continue; }
     const text = p.say ?? p.count;
-    const audio = cache[text] || (cache[text] = await say(text));
-    bufs.push(audio);
-    if (p.count !== undefined) bufs.push(silence(Math.max(0, 1 - audio.length / BYTES_PER_SEC))); // 숫자는 1초에 맞춘다
+    let audio = cache[text] || (cache[text] = await say(text));
+    if (p.count !== undefined) {
+      // 숫자는 정확히 1초: 길면 1초에서 자르고(gen.py와 같음), 짧으면 무음으로 채운다
+      const max = Math.floor(BYTES_PER_SEC / FRAME_BYTES) * FRAME_BYTES;
+      if (audio.length > max) audio = audio.subarray(0, max);
+      bufs.push(audio, silence(Math.max(0, 1 - audio.length / BYTES_PER_SEC)));
+    } else bufs.push(audio);
   }
   bufs.push(silence(0.5));
   return Buffer.concat(bufs);
