@@ -8,6 +8,7 @@ on:
     paths:
       - "audio/scripts/**"
       - "audio/gen.py"
+      - "audio/voices.json"
       - ".github/workflows/voice.yml"
   workflow_dispatch:
 
@@ -41,7 +42,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add audio/files audio/manifest.json
+          git add -A audio/files audio/samples audio/manifest.json audio/drafts.json audio/samples.json
           if git diff --cached --quiet; then
             echo "바뀐 음성이 없어요"
           else
@@ -52,6 +53,7 @@ jobs:
       - name: CDN(jsDelivr) 캐시 새로 고치기
         run: |
           curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/audio/manifest.json"
+          curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/audio/drafts.json" > /dev/null
           for f in audio/files/*.mp3; do
             curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$f" > /dev/null
           done

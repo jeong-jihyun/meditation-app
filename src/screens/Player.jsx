@@ -50,7 +50,7 @@ export default function Player() {
         <button className="primary-btn" id="soundBtn" onClick={() => openSheet("soundSheet")}>배경음 · {BG[p.bg].short}</button>
       </div>
       <p className="credit" style={{ marginTop: 20 }}>
-        목소리: Microsoft 음성 합성(SunHi) · {bgc}
+        목소리: {t?.voiceName ? `성우 ${t.voiceName} · ` : ""}Microsoft 음성 합성 · {bgc}
         <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a>
       </p>
     </>

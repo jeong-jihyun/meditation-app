@@ -155,3 +155,16 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .dim{position:fixed;inset:0;background:#0d110e;opacity:0;pointer-events:none;transition:opacity 2.5s;z-index:50;display:grid;place-items:center}
 .dim.on{opacity:.9;pointer-events:auto}
 .dim p{color:#7f897f;font-size:12px;letter-spacing:.1em}
+
+/* 계정 카드 (MY) */
+.account{background:var(--surface);border-radius:18px;padding:16px;margin-top:12px;box-shadow:var(--shadow)}
+.account .who{display:flex;align-items:center;gap:12px}
+.account .who img,.account .who .ph{width:42px;height:42px;border-radius:50%;object-fit:cover;flex:none;background:var(--soft);display:grid;place-items:center;font-weight:800;color:var(--primary-dark)}
+.account .who .t{flex:1;min-width:0}
+.account .who b{display:block;font-size:15px}
+.account .who small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis}
+.account .badge{margin:0}
+.account .badge.plain{color:var(--muted)}
+.account .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.account .acts a{text-decoration:none}
+.account .gbtn{display:flex;justify-content:center;min-height:44px;margin-top:10px}

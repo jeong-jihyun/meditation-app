@@ -27,14 +27,33 @@ src/
   lib/ui.js                화면 이동 · 설정 창 · 알림 · 잠들기 화면
   components/              머리글 · 하단 탭 · 아이콘 · 설정 창
   screens/                 홈 · 탐색 · 명상 · 호흡 · MY
+  admin/                   관리자 화면 (/admin)
+  lib/auth.js              Google 로그인
+api/                       서버 함수 (로그인 확인 · 대본 저장 · 진행 상황)
 public/img/                사진
 audio/                     명상 대본 · 음성 생성기 · 만들어진 음성(CDN으로 제공)
 ```
 - 개발: `npm install` 후 `npm run dev`
 - 배포: GitHub에 올리면 Vercel이 `npm run build`로 자동 배포 (`vercel.json`)
 
+## 관리자 기능 (/admin)
+- 주소: https://meditation-app-one-iota.vercel.app/admin (MY 탭 → 계정 → 콘텐츠 관리)
+- Google 로그인 — `mujuk73@gmail.com`(환경변수 ADMIN_EMAILS)은 관리자, 그 밖의 계정은 일반 사용자
+- 대본 쓰기 · 성우 5명(서연·하늘·민준·지후·도현) 고르기 · 톤 · 속도 · 문장 사이 쉼 조절
+- 초안(앱에 안 보임) / 공개 저장, 고치기, 삭제, 목소리 만들기 진행 상황 보기
+- 저장 → 서버(`api/admin`)가 GitHub `audio/scripts/`에 대본 저장 → GitHub Actions가 목소리 생성 → 앱에 반영
+
+Vercel 환경변수 (모두 무료)
+| 이름 | 값 |
+|---|---|
+| `GOOGLE_CLIENT_ID` | Google Cloud OAuth 클라이언트 ID (웹, 승인된 원본에 앱 주소) |
+| `GITHUB_TOKEN` | meditation-app 저장소 전용 토큰 (Contents 읽기·쓰기, Actions 읽기) |
+| `ADMIN_EMAILS` | (선택) 관리자 이메일, 쉼표로 여러 명 |
+
+설정 전에는 로그인 카드가 숨겨지고, 앱은 지금처럼 그대로 동작합니다.
+
 ## 음성이 만들어지는 방식
-1. 대본은 `audio/scripts/*.txt` 에 있습니다. (`~5` = 5초 쉬기, ` / ` = 1초씩 숫자 세기)
+1. 대본은 `audio/scripts/*.txt` 에 있습니다. (`~5` = 5초 쉬기, ` / ` = 1초씩 숫자 세기, 맨 위 `voice/pitch/rate/gap/status` 줄로 성우·톤·속도·쉼·공개 여부)
 2. 대본이 바뀌어 GitHub에 올라가면 GitHub Actions(`.github/workflows/voice.yml`)가
    `audio/gen.py` 로 사람 목소리 MP3를 만들어 `audio/files/` 에 올립니다. (목소리: Microsoft SunHi, 무료)
 3. 앱은 jsDelivr CDN(`cdn.jsdelivr.net/gh/jeong-jihyun/meditation-app@main/audio/`)에서 음성을 받아 재생합니다.

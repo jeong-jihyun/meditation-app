@@ -1,0 +1,11 @@
+{
+  "_설명": "성우 목록. 관리자 화면과 audio/gen.py가 함께 씁니다. pitch(Hz)·rate(%)는 성우 기본값이고, 대본마다 톤·속도를 더하거나 뺄 수 있어요.",
+  "sample": "안녕하세요. 오늘 하루도 정말 수고 많았어요. 천천히 숨을 들이쉬고, 편안하게 내쉬어 보세요.",
+  "voices": [
+    { "id": "seoyeon", "name": "서연", "gender": "female", "desc": "따뜻하고 차분한 여성", "engine": "ko-KR-SunHiNeural", "pitch": -2, "rate": 0 },
+    { "id": "haneul", "name": "하늘", "gender": "female", "desc": "맑고 부드러운 여성", "engine": "ko-KR-SunHiNeural", "pitch": 6, "rate": 4 },
+    { "id": "minjun", "name": "민준", "gender": "male", "desc": "편안하고 다정한 남성", "engine": "ko-KR-InJoonNeural", "pitch": 0, "rate": 0 },
+    { "id": "jihu", "name": "지후", "gender": "male", "desc": "자연스럽고 또렷한 남성", "engine": "ko-KR-HyunsuMultilingualNeural", "pitch": 0, "rate": 0 },
+    { "id": "dohyun", "name": "도현", "gender": "male", "desc": "낮고 깊은 남성", "engine": "ko-KR-InJoonNeural", "pitch": -8, "rate": -6 }
+  ]
+}

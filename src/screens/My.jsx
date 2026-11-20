@@ -1,10 +1,44 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useStore } from "../lib/store.js";
 import { records, stats, resetLog, dayKey } from "../lib/records.js";
 import { settings, toggleSetting, chooseTheme, isNightHour } from "../lib/settings.js";
 import { player, keepAwake, releaseAwake } from "../lib/player.js";
 import { toast, armDim, clearDim } from "../lib/ui.js";
 import { THEMES } from "../data.js";
+import { auth, checkLogin, renderGoogleButton, logout } from "../lib/auth.js";
+
+// 계정: 로그인은 선택. 관리자 계정이면 콘텐츠 관리로 갈 수 있다
+function Account() {
+  const a = useStore(auth);
+  const btn = useRef(null);
+  useEffect(() => { checkLogin(); }, []);
+  useEffect(() => { if (a.enabled && !a.user) renderGoogleButton(btn.current); }, [a.enabled, a.user]);
+  if (!a.user && !a.enabled) return null; // 로그인 설정 전에는 숨김
+  return (
+    <>
+      <h3 style={{ margin: "26px 0 0" }}>계정</h3>
+      {a.user ? (
+        <div className="account">
+          <div className="who">
+            {a.user.picture ? <img src={a.user.picture} alt="" referrerPolicy="no-referrer" /> : <span className="ph">{(a.user.name || "?").slice(0, 1)}</span>}
+            <span className="t"><b>{a.user.name}</b><small>{a.user.email}</small></span>
+            <span className={"badge" + (a.user.role === "admin" ? "" : " plain")}>{a.user.role === "admin" ? "관리자" : "일반 사용자"}</span>
+          </div>
+          <div className="acts">
+            {a.user.role === "admin" && <a className="primary-btn" href="/admin">콘텐츠 관리</a>}
+            <button className="chip" onClick={() => { logout(); toast("로그아웃했어요"); }}>로그아웃</button>
+          </div>
+        </div>
+      ) : (
+        <div className="account">
+          <p style={{ marginTop: 0 }}>로그인하지 않아도 모든 명상을 들을 수 있어요.</p>
+          <div className="gbtn" ref={btn} />
+          {a.error && <p style={{ color: "#b4483c", fontSize: 12 }}>{a.error}</p>}
+        </div>
+      )}
+    </>
+  );
+}
 
 const Toggle = ({ on }) => <span className={"toggle" + (on ? " on" : "")} />;
 
@@ -65,6 +99,8 @@ export default function My() {
           </button>
         ))}
       </div>
+
+      <Account />
 
       <div style={{ marginTop: 18 }}>
         <button className="setting" onClick={() => toggle("autoNight")}>밤 9시~아침 6시는 밤 테마<Toggle on={s.autoNight} /></button>
