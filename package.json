@@ -1,0 +1,8 @@
+{
+  "name": "meditation-app",
+  "version": "1.0.0",
+  "description": "수면 명상 앱 - 가야금·자연음·뇌파 바이노럴 비트",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
