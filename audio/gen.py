@@ -220,6 +220,9 @@ async def main():
             print("건너뜀(대본 형식 오류):", name, e)
             broken.append(name)
             continue
+        # 대본 파일의 git blob sha (관리자 화면이 "저장한 대본으로 만든 소리인지" 비교하는 데 씀)
+        data = open(os.path.join(SCRIPTS, name), "rb").read()
+        src = hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
         file = f"files/{tid}.mp3"
         dst = os.path.join(ROOT, file)
         used.add(f"{tid}.mp3")
@@ -236,7 +239,7 @@ async def main():
         track = {"id": tid, "category": meta.get("category", "breath"), "title": meta.get("title", tid),
                  "desc": meta.get("desc", ""), "file": file, "duration": seconds,
                  "voice": v["engine"], "voiceId": v["id"], "voiceName": v["name"],
-                 "pitch": v["pitch"], "rate": v["rate"], "hash": meta["hash"]}
+                 "pitch": v["pitch"], "rate": v["rate"], "hash": meta["hash"], "src": src}
         (drafts if status == "draft" else published).append(track)
     # 지운 대본의 음성 파일도 지운다
     # (형식이 틀린 대본이 있으면 그 대본의 음성이 지워지지 않도록 이번에는 지우지 않는다)

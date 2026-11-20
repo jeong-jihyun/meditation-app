@@ -216,7 +216,7 @@ function List({ data, busy, onOpen, onReload }) {
                 <button className="admin-item" key={s.path} onClick={() => onOpen(s)}>
                   <span className="t">
                     <strong>{s.meta.title}</strong>
-                    <small>{vname(s.meta.voice)} · {s.built ? mins(s.built.duration) : "목소리 준비 중"} · {s.meta.id}</small>
+                    <small>{vname(s.meta.voice)} · {!s.built ? "목소리 준비 중" : s.built.stale ? "새 목소리 만드는 중" : mins(s.built.duration)} · {s.meta.id}</small>
                   </span>
                   <em className={"badge" + (draft ? " draft" : "")}>{draft ? "초안" : "공개"}</em>
                 </button>
@@ -280,20 +280,28 @@ function Editor({ init, data, busy, onSave, onDelete }) {
     setPlaying(v.id);
   }
 
-  // 지금 고른 성우·톤·속도·쉼으로 대본 앞부분을 실제 목소리로 만들어 들려준다
-  const pvKey = JSON.stringify([f.voice, f.pitch, f.rate, f.gap, f.body.slice(0, 400)]);
-  async function preview() {
+  // 미리듣기: 지금 고른 성우·톤·속도·쉼으로 대본 일부를 실제 목소리로 만들어 들려준다 (저장 전)
+  // - 처음부터: 대본 앞 몇 문장
+  // - 커서 위치부터 / 선택한 부분: 고친 곳을 바로 들어 볼 수 있게
+  const [sel, setSel] = useState([0, 0]);
+  const hasSel = sel[1] > sel[0];
+  const lineStart = f.body.lastIndexOf("\n", Math.max(0, sel[0] - 1)) + 1;
+  const canCursor = hasSel || (sel[0] > 0 && lineStart > 0 && f.body.slice(lineStart).trim() !== "");
+  const textFor = (mode) => (mode === "cursor" ? (hasSel ? f.body.slice(sel[0], sel[1]) : f.body.slice(lineStart)) : f.body);
+  const keyFor = (mode) => JSON.stringify([f.voice, f.pitch, f.rate, f.gap, textFor(mode).slice(0, 400)]);
+  async function preview(mode = "start") {
     sampleRef.current?.pause(); setPlaying(null);
-    setPv((x) => ({ ...x, loading: true, err: "" }));
+    setPv((x) => ({ ...x, loading: mode, err: "" }));
     try {
-      const { url, info } = await adminAudio("preview", { voice: f.voice, pitch: f.pitch, rate: f.rate, gap: f.gap, body: f.body });
+      const { url, info } = await adminAudio("preview", { voice: f.voice, pitch: f.pitch, rate: f.rate, gap: f.gap, body: textFor(mode) });
       if (pv.url) URL.revokeObjectURL(pv.url);
-      setPv({ url, info, key: pvKey, loading: false, err: "" });
+      setPv({ url, info, mode, key: keyFor(mode), loading: false, err: "" });
     } catch (e) {
       setPv((x) => ({ ...x, loading: false, err: e.message }));
     }
   }
-  const pvStale = pv.url && pv.key !== pvKey;
+  const pvStale = pv.url && pv.key !== keyFor(pv.mode);
+  const trackSel = (e) => setSel([e.target.selectionStart, e.target.selectionEnd]);
   useEffect(() => { if (pv.url) previewRef.current?.play().catch(() => {}); }, [pv.url]); // 새로 만든 소리를 바로 재생
 
   function insert(text) {
@@ -344,20 +352,10 @@ function Editor({ init, data, busy, onSave, onDelete }) {
             </div>
           ))}
         </div>
-        <p className="hint">▶ 성우 목소리를 비교해 들어 보세요. 톤·속도·쉼은 아래 <b>지금 설정으로 듣기</b>로 확인해요.</p>
+        <p className="hint">▶ 성우 목소리를 비교해 들어 보세요. 톤·속도·쉼을 바꾼 뒤에는 대본 아래 <b>미리듣기</b>로 실제 소리를 확인해요.</p>
         <Slider label="톤 (높낮이)" value={f.pitch} min={-10} max={10} step={1} onChange={set("pitch")} left="낮게" right="높게" show={(v) => (v > 0 ? "+" : "") + v} />
         <Slider label="말하는 속도" value={f.rate} min={-30} max={20} step={2} onChange={set("rate")} left="느리게" right="빠르게" show={(v) => (v > 0 ? "+" : "") + v + "%"} />
         <Slider label="문장 사이 쉼" value={f.gap} min={0.4} max={3} step={0.1} onChange={set("gap")} left="짧게" right="길게" show={(v) => v.toFixed(1) + "초"} />
-        <div className="preview">
-          <button type="button" className="primary-btn wide" onClick={preview} disabled={pv.loading}>
-            {pv.loading ? <><span className="spin" />목소리 만드는 중…</> : pvStale ? "▶ 바뀐 설정으로 다시 듣기" : "▶ 지금 설정으로 듣기"}
-          </button>
-          <p className="hint">{f.body.trim() ? "대본 앞부분(몇 문장)을" : "대본이 비어 있어 인사 문장을"} 지금 고른 성우·톤·속도·쉼 그대로 만들어 들려줘요. 5~10초 걸려요.</p>
-          {pv.err && <p className="warn">{pv.err}</p>}
-          {pv.url && <audio ref={previewRef} className="built" controls src={pv.url} onPlay={() => { sampleRef.current?.pause(); setPlaying(null); }} />}
-          {pv.info?.heard?.length > 0 && <p className="hint heard"><b>실제로 읽은 내용</b> {pv.info.heard.join(" · ")}</p>}
-          {pvStale && <p className="warn">설정이나 대본이 바뀌었어요. 다시 들으려면 위 버튼을 눌러 주세요.</p>}
-        </div>
       </section>
 
       <section className="card">
@@ -367,17 +365,38 @@ function Editor({ init, data, busy, onSave, onDelete }) {
           <button type="button" className="chip" onClick={() => insert("~10")}>+ 10초 쉬기</button>
           <button type="button" className="chip" onClick={() => insert("천천히 들이쉬세요. / 하나 / 둘 / 셋 / 넷")}>+ 숫자 세기</button>
         </div>
-        <textarea ref={bodyRef} className="field script" value={f.body} onChange={set("body")}
+        <textarea ref={bodyRef} className="field script" value={f.body} onChange={(e) => { set("body")(e); trackSel(e); }} onSelect={trackSel}
           placeholder={"한 줄에 한 문장씩 써 주세요.\n\n안녕하세요. 지금부터 숨에 집중해 볼게요.\n~3\n천천히 들이쉬세요. / 하나 / 둘 / 셋 / 넷"} />
         <p className="hint">한 줄 = 한 번 말하기 · <b>~5</b> = 5초 쉬기 · <b>문장 / 하나 / 둘</b> = 숫자를 1초씩 세기</p>
       </section>
 
+      <section className="card preview">
+        <h2>미리듣기 <small>저장 전 · 지금 대본과 설정 그대로</small></h2>
+        <div className="row-btns pv-btns">
+          <button type="button" className="primary-btn" onClick={() => preview("start")} disabled={!!pv.loading}>
+            {pv.loading === "start" ? <><span className="spin" />만드는 중…</> : "▶ 처음부터 듣기"}
+          </button>
+          {canCursor && (
+            <button type="button" className="primary-btn" onClick={() => preview("cursor")} disabled={!!pv.loading}>
+              {pv.loading === "cursor" ? <><span className="spin" />만드는 중…</> : hasSel ? "▶ 선택한 부분 듣기" : "▶ 커서 위치부터 듣기"}
+            </button>
+          )}
+        </div>
+        <p className="hint">몇 문장(약 30초)을 실제 목소리로 만들어 들려줘요. 5~10초 걸려요. 고친 곳을 들으려면 대본에서 그 줄을 누르거나 드래그한 뒤 <b>커서 위치부터 듣기</b>를 눌러요.</p>
+        {pv.err && <p className="warn">{pv.err}</p>}
+        {pv.url && <audio ref={previewRef} className="built" controls src={pv.url} onPlay={() => { sampleRef.current?.pause(); setPlaying(null); }} />}
+        {pv.info?.heard?.length > 0 && <p className="hint heard"><b>실제로 읽은 내용</b> {pv.info.heard.join(" · ")}</p>}
+        {pvStale && <p className="warn">미리듣기를 만든 뒤에 대본이나 설정이 바뀌었어요. 다시 눌러 주세요.</p>}
+      </section>
+
       {built && (
         <section className="card">
-          <h2>만들어진 소리</h2>
+          <h2>저장된 소리 <small>앱에서 나오는 소리</small></h2>
+          {changed
+            ? <p className="warn box">대본이나 설정을 고쳤어요. 아래는 <b>고치기 전</b> 소리예요. 고친 내용은 위 <b>미리듣기</b>로 듣고, 저장하면 1~5분 뒤 새 소리로 바뀌어요.</p>
+            : built.stale && <p className="warn box">방금 저장한 내용으로 새 소리를 만들고 있어요(1~5분). 아래는 <b>이전</b> 소리예요.</p>}
           <p>{built.voiceName || preset?.name} · 톤 {built.pitch || "-"} · 속도 {built.rate || "-"} · {mins(built.duration)}</p>
-          <audio className="built" controls preload="none" src={data.cdn + built.file + "?v=" + built.hash} />
-          {changed && <p className="warn">설정이나 대본을 바꿨어요. 저장하면 새 소리를 만들어요.</p>}
+          <audio className={"built" + (changed || built.stale ? " old" : "")} controls preload="none" src={data.cdn + built.file + "?v=" + built.hash} />
         </section>
       )}
 

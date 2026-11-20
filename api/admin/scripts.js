@@ -25,7 +25,9 @@ async function list() {
   const scripts = await Promise.all(files.filter((f) => f.name.endsWith(".txt")).map(async (f) => {
     const raw = unb64((await gh(`/contents/${f.path}?ref=${BRANCH}`)).content);
     const { meta, body } = parseScript(raw);
-    return { path: f.path, sha: f.sha, meta, body, built: built[meta.id] || null };
+    const b = built[meta.id];
+    // stale: 저장한 대본이 아직 소리로 만들어지지 않음 (gen.py가 적어 둔 대본 sha와 다름)
+    return { path: f.path, sha: f.sha, meta, body, built: b ? { ...b, stale: !!b.src && b.src !== f.sha } : null };
   }));
   // 파일이 커밋에 고정된 CDN 주소 (캐시 때문에 옛 소리가 나오는 일이 없음)
   const cdn = `https://cdn.jsdelivr.net/gh/${REPO}@${head.sha}/audio/`;
