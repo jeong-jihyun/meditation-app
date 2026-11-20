@@ -1,0 +1,58 @@
+name: 명상 음성 만들기
+
+# 대본(audio/scripts)이 바뀌면 사람 목소리 MP3를 만들어 저장소에 올리고,
+# jsDelivr CDN 캐시를 새로 고친다.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "audio/scripts/**"
+      - "audio/gen.py"
+      - ".github/workflows/voice.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: voice
+  cancel-in-progress: false
+
+jobs:
+  voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 도구 설치 (edge-tts, ffmpeg)
+        run: |
+          pip install "edge-tts>=7,<8"
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - name: 대본을 음성으로 만들기
+        run: python audio/gen.py
+
+      - name: 만든 음성 파일 올리기
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audio/files audio/manifest.json
+          if git diff --cached --quiet; then
+            echo "바뀐 음성이 없어요"
+          else
+            git commit -m "chore: 명상 음성 파일 생성 (자동)"
+            git push
+          fi
+
+      - name: CDN(jsDelivr) 캐시 새로 고치기
+        run: |
+          curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/audio/manifest.json"
+          for f in audio/files/*.mp3; do
+            curl -s "https://purge.jsdelivr.net/gh/${{ github.repository }}@main/$f" > /dev/null
+          done
+          echo "CDN 갱신 요청 완료"
