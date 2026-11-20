@@ -13,7 +13,8 @@
       "voiceName": "서연",
       "pitch": "-2Hz",
       "rate": "-12%",
-      "hash": "f969fd743ef1"
+      "hash": "f969fd743ef1",
+      "src": "c27356100db504842ed23c9c1db6f814cd75256f"
     },
     {
       "id": "breath-478",
@@ -27,7 +28,8 @@
       "voiceName": "서연",
       "pitch": "-2Hz",
       "rate": "-12%",
-      "hash": "84f6e6a922c5"
+      "hash": "84f6e6a922c5",
+      "src": "0da927a6400b5a78d5eac495e21037b871dede0b"
     },
     {
       "id": "stress-letgo",
@@ -41,7 +43,8 @@
       "voiceName": "서연",
       "pitch": "-2Hz",
       "rate": "-12%",
-      "hash": "0050d594ab79"
+      "hash": "0050d594ab79",
+      "src": "68d25cdfa900b15fae51096ba201b95adaa6e6c5"
     },
     {
       "id": "stress-bodyscan",
@@ -55,7 +58,8 @@
       "voiceName": "서연",
       "pitch": "-2Hz",
       "rate": "-12%",
-      "hash": "c34782d5d957"
+      "hash": "c34782d5d957",
+      "src": "b716fa41f54336db09560aa905e078f63333e986"
     },
     {
       "id": "words-myself",
@@ -69,7 +73,8 @@
       "voiceName": "서연",
       "pitch": "-2Hz",
       "rate": "-12%",
-      "hash": "c9012856e287"
+      "hash": "c9012856e287",
+      "src": "91ad2ceb7673558b892b4becbe20d5bfbbef501c"
     },
     {
       "id": "words-night",
@@ -83,7 +88,8 @@
       "voiceName": "서연",
       "pitch": "-2Hz",
       "rate": "-12%",
-      "hash": "204538e884fe"
+      "hash": "204538e884fe",
+      "src": "4afc4625a95023e2bf716779dfe5613978bb1851"
     }
   ]
 }
