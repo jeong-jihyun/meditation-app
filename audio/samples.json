@@ -1,0 +1,22 @@
+{
+  "seoyeon": {
+    "file": "samples/seoyeon.mp3",
+    "hash": "98bae9963006"
+  },
+  "haneul": {
+    "file": "samples/haneul.mp3",
+    "hash": "c88844ce9de9"
+  },
+  "minjun": {
+    "file": "samples/minjun.mp3",
+    "hash": "43f2298e556a"
+  },
+  "jihu": {
+    "file": "samples/jihu.mp3",
+    "hash": "40cd58031664"
+  },
+  "dohyun": {
+    "file": "samples/dohyun.mp3",
+    "hash": "d96d1fcdcbb9"
+  }
+}

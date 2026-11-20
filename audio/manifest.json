@@ -9,7 +9,11 @@
       "file": "files/breath-46.mp3",
       "duration": 297.3,
       "voice": "ko-KR-SunHiNeural",
-      "hash": "720fd9e2c10a"
+      "voiceId": "seoyeon",
+      "voiceName": "서연",
+      "pitch": "-2Hz",
+      "rate": "-12%",
+      "hash": "f969fd743ef1"
     },
     {
       "id": "breath-478",
@@ -19,7 +23,11 @@
       "file": "files/breath-478.mp3",
       "duration": 320.3,
       "voice": "ko-KR-SunHiNeural",
-      "hash": "e2f006ac41e8"
+      "voiceId": "seoyeon",
+      "voiceName": "서연",
+      "pitch": "-2Hz",
+      "rate": "-12%",
+      "hash": "84f6e6a922c5"
     },
     {
       "id": "stress-letgo",
@@ -29,7 +37,11 @@
       "file": "files/stress-letgo.mp3",
       "duration": 249.5,
       "voice": "ko-KR-SunHiNeural",
-      "hash": "4c95fc49581a"
+      "voiceId": "seoyeon",
+      "voiceName": "서연",
+      "pitch": "-2Hz",
+      "rate": "-12%",
+      "hash": "0050d594ab79"
     },
     {
       "id": "stress-bodyscan",
@@ -39,7 +51,11 @@
       "file": "files/stress-bodyscan.mp3",
       "duration": 289.7,
       "voice": "ko-KR-SunHiNeural",
-      "hash": "d6615c9e7ec2"
+      "voiceId": "seoyeon",
+      "voiceName": "서연",
+      "pitch": "-2Hz",
+      "rate": "-12%",
+      "hash": "c34782d5d957"
     },
     {
       "id": "words-myself",
@@ -49,7 +65,11 @@
       "file": "files/words-myself.mp3",
       "duration": 231.6,
       "voice": "ko-KR-SunHiNeural",
-      "hash": "bcec4af3ae6d"
+      "voiceId": "seoyeon",
+      "voiceName": "서연",
+      "pitch": "-2Hz",
+      "rate": "-12%",
+      "hash": "c9012856e287"
     },
     {
       "id": "words-night",
@@ -59,7 +79,11 @@
       "file": "files/words-night.mp3",
       "duration": 226.3,
       "voice": "ko-KR-SunHiNeural",
-      "hash": "038ec505fcb5"
+      "voiceId": "seoyeon",
+      "voiceName": "서연",
+      "pitch": "-2Hz",
+      "rate": "-12%",
+      "hash": "204538e884fe"
     }
   ]
 }
