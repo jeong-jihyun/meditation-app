@@ -1,4 +1,65 @@
 {
   "version": 1,
-  "tracks": []
+  "tracks": [
+    {
+      "id": "breath-46",
+      "category": "breath",
+      "title": "편안한 4·6 호흡",
+      "desc": "4초 들이쉬고 6초 내쉬며 몸의 긴장을 풀어요",
+      "file": "files/breath-46.mp3",
+      "duration": 297.3,
+      "voice": "ko-KR-SunHiNeural",
+      "hash": "720fd9e2c10a"
+    },
+    {
+      "id": "breath-478",
+      "category": "breath",
+      "title": "잠이 오는 4·7·8 호흡",
+      "desc": "잠들기 전 누워서 듣는 느린 호흡",
+      "file": "files/breath-478.mp3",
+      "duration": 320.3,
+      "voice": "ko-KR-SunHiNeural",
+      "hash": "e2f006ac41e8"
+    },
+    {
+      "id": "stress-letgo",
+      "category": "stress",
+      "title": "걱정 내려놓기",
+      "desc": "머릿속을 맴도는 생각을 하나씩 내려놓아요",
+      "file": "files/stress-letgo.mp3",
+      "duration": 249.5,
+      "voice": "ko-KR-SunHiNeural",
+      "hash": "4c95fc49581a"
+    },
+    {
+      "id": "stress-bodyscan",
+      "category": "stress",
+      "title": "몸 구석구석 풀어주기",
+      "desc": "머리부터 발끝까지 긴장을 풀어 주는 이완 명상",
+      "file": "files/stress-bodyscan.mp3",
+      "duration": 289.7,
+      "voice": "ko-KR-SunHiNeural",
+      "hash": "d6615c9e7ec2"
+    },
+    {
+      "id": "words-myself",
+      "category": "words",
+      "title": "오늘의 나에게",
+      "desc": "지친 마음을 다독이는 짧은 글 일곱 편",
+      "file": "files/words-myself.mp3",
+      "duration": 231.6,
+      "voice": "ko-KR-SunHiNeural",
+      "hash": "bcec4af3ae6d"
+    },
+    {
+      "id": "words-night",
+      "category": "words",
+      "title": "잠들기 전 마음 정리",
+      "desc": "하루를 돌아보고 고마운 일을 떠올리며 잠드는 시간",
+      "file": "files/words-night.mp3",
+      "duration": 226.3,
+      "voice": "ko-KR-SunHiNeural",
+      "hash": "038ec505fcb5"
+    }
+  ]
 }
